@@ -4,7 +4,7 @@ import rospy
 from std_msgs.msg import Float32, Float64
 
 class DSP3000(threading.Thread):
-    def __init__(self, port="/dev/ttyUSB0", baud=38400):
+    def __init__(self, port="/dev/dsp3000", baud=38400):
         super().__init__()
         self.daemon = True
         self.ser = serial.Serial(port, baud, timeout=1)
@@ -28,7 +28,7 @@ class DSP3000(threading.Thread):
                 continue
 
             try:
-                x_rate = float(data[0])   # deg/s
+                x_rate = -float(data[0])   # deg/s
                 validity = int(data[1])
             except ValueError:
                 rospy.logwarn(f"DSP3000 invalid data: {data}")
@@ -52,7 +52,7 @@ class DSP3000(threading.Thread):
 
 
 class DSP1760(threading.Thread):
-    def __init__(self, port="/dev/ttyUSB1", baud=115200,
+    def __init__(self, port="/dev/dsp1760", baud=115200,
                  frame_len=36, header_hex="FE81FF55", axis_offset=12,
                  deg_units=True, bias_deg=0.0, invert=False):
         super().__init__()
