@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>gyro</name>
+  <version>0.0.0</version>
+  <description>The gyro package</description>
+
+  <maintainer email="morin_lab@kaist.ac.kr">taekjoong</maintainer>
+  <license>MIT</license> <!-- 실제 라이선스로 교체 -->
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- ROS 패키지 의존성 -->
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+
+  <export>
+  </export>
+</package>
