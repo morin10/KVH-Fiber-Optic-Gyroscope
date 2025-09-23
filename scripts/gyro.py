@@ -2,6 +2,7 @@
 import serial, struct, math, time, threading
 import rospy
 from std_msgs.msg import Float32, Float64
+import math
 
 class DSP3000(threading.Thread):
     def __init__(self, port="/dev/dsp3000", baud=38400):
@@ -9,7 +10,7 @@ class DSP3000(threading.Thread):
         self.daemon = True
         self.ser = serial.Serial(port, baud, timeout=1)
 
-        self.pub_rate = rospy.Publisher("x_angular_rate", Float64, queue_size=10)
+        self.pub_rate = rospy.Publisher("y_angular_rate", Float64, queue_size=10)
         self.pub_pitch = rospy.Publisher("pitch", Float32, queue_size=10)
 
         self.pitch_deg = 0.0
@@ -28,7 +29,7 @@ class DSP3000(threading.Thread):
                 continue
 
             try:
-                x_rate = -float(data[0])   # deg/s
+                y_rate = float(data[0])   # deg/s
                 validity = int(data[1])
             except ValueError:
                 rospy.logwarn(f"DSP3000 invalid data: {data}")
@@ -38,15 +39,17 @@ class DSP3000(threading.Thread):
             if self.last_time is not None:
                 dt = now - self.last_time
                 # pitch 적분
-                self.pitch_deg += x_rate * dt
+                self.pitch_deg += y_rate * dt
+                
                 # wrap-around (-180 ~ +180)
                 self.pitch_deg = (self.pitch_deg + 180.0) % 360.0 - 180.0
+
                 self.pub_pitch.publish(Float32(self.pitch_deg))
 
             self.last_time = now
 
-            # publish raw x_rate
-            self.pub_rate.publish(x_rate)
+            # publish raw y_rate
+            self.pub_rate.publish(y_rate/180.0*math.pi)
 
         self.ser.close()
 
@@ -94,7 +97,7 @@ class DSP1760(threading.Thread):
         self.last_time = now
 
         # 퍼블리시
-        self.pub_z.publish(Float32(z_deg))
+        self.pub_z.publish(z_deg/180.0*math.pi)
 
     def run(self):
         while not rospy.is_shutdown():
